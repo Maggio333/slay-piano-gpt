@@ -1,0 +1,9 @@
+# cache
+__pycache__/
+*.pyc
+
+# Wszystko w data/ jest robocze (dane thesession + generacje) i NIE idzie do repo.
+# Zostawiamy tylko model i krzywą treningu. Dane odbudujesz przez src/prepare_data.py.
+data/*
+!data/gpt_ckpt.pt
+!data/loss_log.csv
