@@ -1,0 +1,40 @@
+{
+  "corpus_chars": 2452610,
+  "vocab": 52,
+  "train_chars": 2207349,
+  "val_chars": 245261,
+  "seed": 20260620,
+  "models": [
+    {
+      "model": "GPT (transformer)",
+      "params": 816384,
+      "val_loss": 1.3401,
+      "perplexity": 3.82,
+      "context": 128,
+      "novelty_new_pct": {
+        "4": 3.2,
+        "6": 25.3,
+        "8": 66.5
+      },
+      "abc_valid_pct": 58.3,
+      "avg_len": 245.2,
+      "n_samples": 24
+    },
+    {
+      "model": "n-gram (order-6)",
+      "params": null,
+      "val_loss": 1.6075,
+      "perplexity": 4.99,
+      "context": 6,
+      "scored_chars": 120000,
+      "novelty_new_pct": {
+        "4": 2.7,
+        "6": 8.0,
+        "8": 19.4
+      },
+      "abc_valid_pct": 29.2,
+      "avg_len": 274.3,
+      "n_samples": 24
+    }
+  ]
+}
