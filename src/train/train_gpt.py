@@ -20,7 +20,8 @@ eval_interval = 200
 eval_iters  = 100
 warmup      = 100
 
-torch.manual_seed(20260620)
+SEED = int(sys.argv[5]) if len(sys.argv) > 5 else 20260620   # argv[5]: seed (niezależne modele do E_CKA/E0.5)
+torch.manual_seed(SEED)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 use_bf16 = device == "cuda" and torch.cuda.is_bf16_supported()
 ctx = torch.autocast(device_type="cuda", dtype=torch.bfloat16) if use_bf16 else nullcontext()
