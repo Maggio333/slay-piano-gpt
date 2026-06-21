@@ -20,16 +20,11 @@ sys.stdout.reconfigure(encoding="utf-8")
 torch.manual_seed(0)
 DEV = "cpu"
 
-# Probe: reprezentatywne wzorce ABC z użyciem znaków uniwersalnych dla wszystkich korpusów.
-PROBE = (
-    "GABc dedB ABAG EDEG GABc dedB Aaab ageg edBe dBAG "
-    "cdef gfed cAGE DEFG ABcd efge dcBA GFED CDEF GABc "
-    "fgaf gfed cdec BABc dABG AGFE DEFG Afed cBAG FGAB "
-    "ceac BdGB Acea gfed cede fgaf edcB AGEF GABc dBGB "
-    "eage dBGB AcBc defg agfe dcBA Bcde fedc BAGF EDCB "
-) * 3
-
-W = 48   # długość okna (≤ block_size każdego modelu)
+# Probe: REALNY, zróżnicowany fragment korpusu (bez sztucznych duplikatów).
+# Naprawa K1: wcześniej był jeden blok powtórzony 3× → fałszywe identyczne sąsiedztwa zawyżały mutual-kNN.
+W = 48                          # długość okna (≤ block_size każdego modelu)
+PROBE_FILE = "data/jigs.abc"
+PROBE_SLICE = (2000, 14000)     # wycinek ze środka korpusu (pomija nagłówki na początku pliku)
 
 
 def load(path):
@@ -40,8 +35,8 @@ def load(path):
     return m, ck["stoi"]
 
 
-def random_like(cfg):
-    torch.manual_seed(12345)
+def random_like(cfg, seed=12345):
+    torch.manual_seed(seed)
     return GPT(cfg).to(DEV).eval()
 
 
@@ -108,13 +103,15 @@ def main():
             print(f"(pomijam {name}: brak {p})")
 
     common_set = set.intersection(*vocabs)
-    common = "".join(c for c in PROBE if c in common_set)
+    raw = open(PROBE_FILE, encoding="utf-8").read()[PROBE_SLICE[0]:PROBE_SLICE[1]]
+    common = "".join(c for c in raw if c in common_set)
     nwin = len(common) // W
-    print(f"wspólny słownik: {len(common_set)} znaków | probe: {len(common)} znaków -> {nwin} okien x {W} = {nwin*W} próbek\n")
+    print(f"wspólny słownik: {len(common_set)} znaków | probe REALNY (bez duplikatów): {len(common)} znaków -> N = {nwin} okien x {W} = {nwin*W} próbek\n")
 
     # baseline losowy o architekturze jiga
     jig_cfg = models["jig"][0].cfg
-    models["LOSOWY"] = (random_like(jig_cfg), models["jig"][1])
+    models["LOSOWY"] = (random_like(jig_cfg, 12345), models["jig"][1])
+    models["LOSOWY2"] = (random_like(jig_cfg, 99999), models["jig"][1])   # właściwy null: losowy vs losowy
 
     R = {n: reps(m, stoi, common) for n, (m, stoi) in models.items()}
     nlayer = len(R["jig"])
@@ -142,7 +139,7 @@ def main():
 
     def mean_std(xs):
         m = sum(xs) / len(xs)
-        s = (sum((x - m) ** 2 for x in xs) / len(xs)) ** 0.5
+        s = (sum((x - m) ** 2 for x in xs) / max(1, len(xs) - 1)) ** 0.5   # std PRÓBKOWE (/(n-1))
         return m, s
 
     for label, group in SCALES:
@@ -161,10 +158,12 @@ def main():
     if "jig-v2" in models:
         print(f"jig vs jig-v2 (te same dane, INNY seed):   CKA {pair(linear_cka,'jig','jig-v2'):.3f} | kNN {pair(mutual_knn,'jig','jig-v2'):.3f}")
     print(f"jig vs waltz (inne dane/styl):             CKA {pair(linear_cka,'jig','waltz'):.3f} | kNN {pair(mutual_knn,'jig','waltz'):.3f}")
-    print(f"jig vs LOSOWY (baseline/null):             CKA {pair(linear_cka,'jig','LOSOWY'):.3f} | kNN {pair(mutual_knn,'jig','LOSOWY'):.3f}")
-    print("\nOdczyt: wysokie jig–jig-v2 + niskie *–LOSOWY = konwergencja (cechy wspólne, nie artefakt).")
-    print("Niskie jig–jig-v2 ~ poziom LOSOWY = brak konwergencji na tej skali (spójne z E1-remisem).")
-    print("To PIERWSZY punkt — pełny test PRH wymaga sweepu po skali (0,2M / 0,8M / 3M).")
+    print(f"jig vs LOSOWY (trenowany vs losowy):        CKA {pair(linear_cka,'jig','LOSOWY'):.3f} | kNN {pair(mutual_knn,'jig','LOSOWY'):.3f}")
+    print(f"NULL właściwy — LOSOWY vs LOSOWY2 (2 losowe): CKA {pair(linear_cka,'LOSOWY','LOSOWY2'):.3f} | kNN {pair(mutual_knn,'LOSOWY','LOSOWY2'):.3f}")
+    print("\n=== CKA per-warstwa: jig vs jig-v2 (czy zgodność nie siedzi tylko w L0?) ===")
+    for l in range(nlayer):
+        print(f"  blok {l}: CKA {linear_cka(R['jig'][l], R['jig-v2'][l]):.3f} | kNN {mutual_knn(R['jig'][l], R['jig-v2'][l]):.3f}")
+    print("\nUwaga: jig–jig-v2 = te same dane, inny seed → STABILNOŚĆ względem seeda, nie 'platońska konwergencja'.")
 
 
 if __name__ == "__main__":
