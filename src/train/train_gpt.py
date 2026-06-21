@@ -10,9 +10,9 @@ from core.gpt import GPT, GPTConfig
 # --- hiperparametry ---
 block_size  = 128
 batch_size  = 32
-n_layer     = 4
+n_layer     = int(os.environ.get("N_LAYER", 4))    # ENV: sweep skali (E_CKA)
 n_head      = 4
-n_embd      = 128
+n_embd      = int(os.environ.get("N_EMBD", 128))    # ENV: sweep skali (E_CKA)
 dropout     = 0.1
 lr          = 3e-4
 max_iters   = 2000

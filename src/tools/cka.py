@@ -89,6 +89,9 @@ def main():
         "waltz": "data/models/waltz_ckpt.pt",
         "reel": "data/models/reel_ckpt.pt",
         "bach": "data/models/bach_ckpt.pt",
+        # sweep skali (te same dane, inny seed, różny n_embd) — test PRH: czy CKA rośnie z rozmiarem
+        "jig_s1": "data/models/jig_s1_ckpt.pt", "jig_s2": "data/models/jig_s2_ckpt.pt",   # ~0,2M (n_embd 64)
+        "jig_l1": "data/models/jig_l1_ckpt.pt", "jig_l2": "data/models/jig_l2_ckpt.pt",   # ~1,8M (n_embd 192)
     }
     models, vocabs = {}, []
     for name, p in paths.items():
@@ -108,9 +111,9 @@ def main():
     jig_cfg = models["jig"][0].cfg
     models["LOSOWY"] = (random_like(jig_cfg), models["jig"][1])
 
-    names = list(models)
     R = {n: reps(m, stoi, common) for n, (m, stoi) in models.items()}
     nlayer = len(R["jig"])
+    core = [n for n in ["jig", "jig-v2", "waltz", "reel", "bach", "LOSOWY"] if n in models]
 
     def pair(metric, a, b):
         return sum(metric(R[a][l], R[b][l]) for l in range(nlayer)) / nlayer
@@ -118,10 +121,19 @@ def main():
     for title, metric in (("Linear CKA (średnia po blokach)", linear_cka),
                           ("Mutual k-NN (k=10, średnia po blokach)", mutual_knn)):
         print(f"=== {title} ===")
-        print("        " + "".join(f"{n:>8}" for n in names))
-        for a in names:
-            print(f"{a:>8}" + "".join(f"{pair(metric, a, b):>8.3f}" for b in names))
+        print("        " + "".join(f"{n:>8}" for n in core))
+        for a in core:
+            print(f"{a:>8}" + "".join(f"{pair(metric, a, b):>8.3f}" for b in core))
         print()
+
+    # KRZYWA SKALI — same-task CKA (inny seed) na 3 rozmiarach: czy konwergencja rośnie z N? (test PRH)
+    print("=== KRZYWA SKALI: same-task CKA (inny seed) vs rozmiar — test PRH ===")
+    for label, a, b in [("~0,2M", "jig_s1", "jig_s2"), ("~0,8M", "jig", "jig-v2"), ("~1,8M", "jig_l1", "jig_l2")]:
+        if a in models and b in models:
+            print(f"{label:>7}: CKA {pair(linear_cka, a, b):.3f} | mutual-kNN {pair(mutual_knn, a, b):.3f}")
+        else:
+            print(f"{label:>7}: (brak modeli {a}/{b})")
+    print("PRH przewiduje: CKA ROŚNIE z rozmiarem. Płasko/spadek = brak trendu w tym zakresie.\n")
 
     # kluczowe porównania
     print("=== kluczowe odczyty ===")
