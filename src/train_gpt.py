@@ -26,11 +26,24 @@ ctx = torch.autocast(device_type="cuda", dtype=torch.bfloat16) if use_bf16 else 
 sys.stdout.reconfigure(encoding="utf-8")
 print(f"urządzenie: {device} | bf16: {use_bf16}")
 
-# --- dane: char-level (vocab=53, jak w baseline) ---
-text = open("data/jigs.abc", encoding="utf-8").read()
-chars = sorted(set(text))
-stoi = {c: i for i, c in enumerate(chars)}
-itos = {i: c for i, c in enumerate(chars)}
+# --- ścieżki z argumentów (domyślnie: jigi) ---
+DATA    = sys.argv[1] if len(sys.argv) > 1 else "data/jigs.abc"
+CKPT    = sys.argv[2] if len(sys.argv) > 2 else "data/gpt_ckpt.pt"
+LOSSLOG = sys.argv[3] if len(sys.argv) > 3 else "data/loss_log.csv"
+VOCAB_FROM = sys.argv[4] if len(sys.argv) > 4 else None   # wspólny słownik z innego ckpt (do stitchu)
+print(f"dane: {DATA} -> checkpoint: {CKPT}")
+
+# --- dane: char-level ---
+text = open(DATA, encoding="utf-8").read()
+if VOCAB_FROM:
+    vck = torch.load(VOCAB_FROM, map_location="cpu", weights_only=False)
+    stoi, itos = vck["stoi"], vck["itos"]
+    chars = [itos[i] for i in range(len(itos))]
+    print(f"wspólny słownik z {VOCAB_FROM}: {len(chars)} znaków")
+else:
+    chars = sorted(set(text))
+    stoi = {c: i for i, c in enumerate(chars)}
+    itos = {i: c for i, c in enumerate(chars)}
 data = torch.tensor([stoi[c] for c in text], dtype=torch.long)
 n = int(0.9 * len(data))
 train_data, val_data = data[:n], data[n:]
@@ -83,7 +96,7 @@ for it in range(max_iters + 1):
             best_val = L["val"]
             torch.save({"model": model.state_dict(), "config": cfg,
                         "stoi": stoi, "itos": itos, "val_loss": best_val},
-                       "data/gpt_ckpt.pt")
+                       CKPT)
     if it == max_iters:
         break
     for g in opt.param_groups:
@@ -96,7 +109,7 @@ for it in range(max_iters + 1):
     torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
     opt.step()
 
-with open("data/loss_log.csv", "w", encoding="utf-8") as f:
+with open(LOSSLOG, "w", encoding="utf-8") as f:
     f.write("\n".join(",".join(map(str, row)) for row in log))
 print(f"\ngotowe. best val loss: {best_val:.3f} (ppl {math.exp(best_val):.2f})")
-print("checkpoint -> data/gpt_ckpt.pt | krzywa -> data/loss_log.csv")
+print(f"checkpoint -> {CKPT} | krzywa -> {LOSSLOG}")

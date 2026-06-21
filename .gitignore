@@ -2,8 +2,12 @@
 __pycache__/
 *.pyc
 
-# Wszystko w data/ jest robocze (dane thesession + generacje) i NIE idzie do repo.
-# Zostawiamy tylko model i krzywą treningu. Dane odbudujesz przez src/prepare_data.py.
+# Surowe dane i generacje NIE idą do repo (licencja thesession / rozmiar).
+# Idą za to wytrenowane MODELE (wagi) — to nasze artefakty.
 data/*
 !data/gpt_ckpt.pt
 !data/loss_log.csv
+!data/models
+data/models/*
+!data/models/*.pt
+data/models/gpt_ckpt_v1_dirty.pt

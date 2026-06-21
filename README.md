@@ -7,69 +7,59 @@ tags:
   - gpt
   - char-level
   - from-scratch
+  - model-composition
+  - stitching
 library_name: pytorch
 pipeline_tag: text-generation
 ---
 
-# slay-piano-gpt — a tiny char-level GPT for Irish jig generation (rendered to piano)
+# Slay Micro-Models — tiny from-scratch music experts + composition research
 
-A **0.82M-parameter** decoder-only Transformer trained **from scratch** on ~12k Irish jigs in
-[ABC notation](https://abcnotation.com/), sourced from [thesession.org](https://thesession.org/).
-It generates new 6/8 jig melodies one character at a time.
+A family of **~0.8M-parameter char-level GPTs**, each trained **from scratch** on monophonic music in
+[ABC notation](https://abcnotation.com/), plus experiments in **composing small experts** (stitching,
+ensembling, duets). Built as research for the **Slayer** collective (toward a "small models, composed"
+paper). Music is the sandbox; the methods generalize.
 
-Built as a learning + research project for the **Slayer** collective. This is the "small LLM" half of an
-**n-gram → mini-transformer** comparison: the same next-token objective as a frontier LLM, at a scale you
-can train on a CPU in ~12 minutes.
+Every expert shares one architecture: decoder-only Transformer — 4 layers, 4 heads, `d_model=128`,
+context 128 chars, character-level. Trained on CPU in minutes.
 
-## Model details
-- **Architecture:** decoder-only Transformer (GPT-style) — token + positional embeddings, causal
-  multi-head self-attention, GELU MLP, residual + LayerNorm, weight-tied output head.
-- **Size:** 4 layers, 4 heads, `d_model=128`, context 128 chars, vocab 52 (character-level).
-- **Parameters:** 816,384.
-- **Tokenizer:** character-level (52 ABC symbols) — no external tokenizer.
+## The experts
+| Expert (`data/models/`) | Style / render | Training data | Val perplexity |
+|---|---|---|---|
+| `gpt_ckpt.pt` (jig) | Irish jig, 6/8 | 12.1k tunes (thesession.org) | **3.80** |
+| `bach_ckpt.pt` | Baroque chorale soprano | 350 soprano lines (music21) | 2.09\* |
+| `waltz_ckpt.pt` | Lyrical waltz, 3/4 → piano | 3.0k tunes | ~4.4 |
+| `reel_ckpt.pt` | Driving fiddle, 4/4 → violin | 17.2k tunes | ~4.9 |
+| `reel_sv_ckpt.pt` | reel on shared vocab (for composition) | 17.2k tunes | ~4.9 |
 
-## Training data
-- 12,106 jigs (meter 6/8) from thesession.org, ABC notation.
-- Chord-symbol annotations (`"..."`) stripped; ornaments (`~`), chords (`[ace]`) and accidentals kept.
-- ~2.45M characters, 90/10 train/val split.
-- The raw dataset is **not redistributed here** — rebuild it with `src/prepare_data.py` from the
-  thesession.org data dump, and please respect thesession.org's terms.
+\* Bach ppl is **not** directly comparable (smaller vocab + very repetitive data).
 
-## Training
-- Objective: next-character cross-entropy.
-- Optimizer: AdamW (`lr=3e-4`, `wd=0.1`), grad-clip 1.0, warmup + cosine decay.
-- 2000 iterations, batch 32, block 128, CPU.
-- **Best validation loss: 1.335 → perplexity 3.80.** Train ≈ val (no overfitting).
+## Composition experiments
+- **E0 (self-stitch) ✅** — a trained linear mapper at an intermediate seam is lossless (Δppl ≈ 0): the stitching **mechanism** is sound (validates plumbing, not the thesis).
+- **Ensemble fusion** (`src/fuse.py`) — blend two experts' next-token distributions (shared vocab) → audible hybrid. This is the **flat-weighting baseline**.
+- **Duet** (`src/duet.py`) — two experts layered (piano + violin, simultaneous): multi-track, not model-level fusion.
+- **Next — E1:** representation-level stitch (the actual hypothesis, meant to beat these baselines).
+
+## Pipeline (`src/`)
+`prepare_data.py` / `prepare_bach.py` (build ABC corpus) → `gpt.py` (architecture) → `train_gpt.py`
+(train; optional shared vocab) → `make_midi.py` / `gen_samples.py` (generate + render) →
+`e0_stitch.py` / `fuse.py` / `duet.py` (composition) · `ngram_model.py` (baseline) · `abc_to_midi.py` (render).
 
 ## Usage
 ```bash
 pip install torch music21
-python src/make_midi.py --key G --n 3 --out out   # -> ABC + MIDI (piano)
-```
-Or load directly:
-```python
-import torch
-from gpt import GPT
-ck = torch.load("data/gpt_ckpt.pt", weights_only=False)
-model = GPT(ck["config"]); model.load_state_dict(ck["model"]); model.eval()
-# seed "X:1\nM:6/8\nK:D\n" -> model.generate(...)
+python src/gen_samples.py --ckpt data/models/waltz_ckpt.pt --meter 3/4 --keys D,G,Emin --inst piano --out out
 ```
 
-## Results
-Compared against a character-level **n-gram (order-6)** baseline on the same corpus. The Transformer
-reaches lower perplexity and noticeably more coherent phrasing, thanks to its 128-character attention
-window vs. the n-gram's 6-character context. Full write-up: Slayer research blog.
+## Honest scope
+**Shown:** a small char-LM learns real musical structure (meter, key signatures, cadences) from
+next-token prediction *alone*; data cleaning measurably helps (ppl 3.88→3.80); the stitch mechanism is
+lossless; experts can be combined (baseline). **Not yet shown:** that representation-level composition of
+small experts beats a single model — the open hypothesis (E1+).
 
-## Limitations (honest)
-- Tiny model: captures local/phrase structure, **not** long-form musical form (no reliable AABB themes).
-- ~128-character memory; no global planning.
-- MIDI rendering is mechanical (fixed velocity, no pedal/phrasing).
-- Occasional malformed repeat markers in raw output.
-- Trained only on 6/8 jigs — don't expect other styles.
+## Data & license
+Code & weights: **MIT**. Training data **not redistributed** — folk tunes from
+[thesession.org](https://thesession.org/) (rebuild via `prepare_data.py`); Bach chorale sopranos via
+`music21`. Please respect source terms.
 
-## Acknowledgements
-- Data: the [thesession.org](https://thesession.org/) community.
-- Built by Arkadiusz Słota for the **Slayer** collective. Educational / research project.
-
-## License
-MIT (code & weights). Training data belongs to thesession.org contributors.
+Built by Arkadiusz Słota for the **Slayer** collective. Educational / research project.

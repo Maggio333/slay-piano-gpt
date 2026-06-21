@@ -14,15 +14,17 @@ def sanitize(abc: str) -> str:
         b = b.replace(":", "")                # dwukropki powtórzeń (|: :| ::)
         b = re.sub(r"\|\s*[12]", "|", b)      # numery volt po kresce |1 |2
         b = re.sub(r"\|+", "|", b)            # scal wielokrotne kreski
+        b = re.sub(r"\^=|=\^|_=|=_", lambda m: m.group(0).replace("=", ""), b)  # zepsute akcydencje (^=)
         out.append(b)
     return "\n".join(out)
 
-def to_midi(abc: str, out_path: str) -> bool:
+def to_midi(abc: str, out_path: str, inst=None) -> bool:
     try:
         score = converter.parse(sanitize(abc), format="abc")
-        # spłaszcz do samych nut/pauz (omija konflikt TimeSignature przy budowie taktów);
-        # domyślny program MIDI = Acoustic Grand Piano
+        # spłaszcz do samych nut/pauz (omija konflikt TimeSignature przy budowie taktów)
         notes = score.flatten().notesAndRests.stream()
+        if inst is not None:                  # ustaw instrument (np. Violin); domyślnie fortepian (GM 0)
+            notes.insert(0, inst)
         notes.write("midi", fp=out_path)
         return True
     except Exception as e:
