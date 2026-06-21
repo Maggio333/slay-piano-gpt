@@ -2,15 +2,15 @@
 W każdym kroku: logits = alpha*A + (1-alpha)*B -> sampluj. Melodia wychodzi stylistycznie pomiędzy.
 To jest baseline „płaskiego ważenia" (KMS5). Stitch reprezentacji = osobny eksperyment (E1).
 Użycie:
-  python src/fuse.py --a data/models/waltz_ckpt.pt --b data/models/reel_sv_ckpt.pt \
+  python src/compose/fuse.py --a data/models/waltz_ckpt.pt --b data/models/reel_sv_ckpt.pt \
       --alpha 0.5 --meter 3/4 --keys D,G,Emin --inst piano --out data/recordings/fuzja
 """
 import argparse, sys, os, math
-sys.path.insert(0, "src")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 from torch.nn import functional as F
-from gpt import GPT
-from abc_to_midi import to_midi
+from core.gpt import GPT
+from core.abc_to_midi import to_midi
 from music21 import instrument as M
 
 INST = {"piano": M.Piano, "violin": M.Violin, "none": None}

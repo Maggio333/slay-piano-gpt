@@ -1,6 +1,6 @@
 """Upload paczki modelu na Hugging Face Hub.
 Wymaga wcześniejszego `huggingface-cli login`. Uruchom z katalogu repo:
-    python src/upload_hf.py Maggio33/slay-piano-gpt
+    python src/tools/upload_hf.py Maggio33/slay-piano-gpt
 """
 import sys
 from huggingface_hub import HfApi, create_repo

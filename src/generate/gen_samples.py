@@ -1,14 +1,14 @@
 """Generuje N próbek z wytrenowanego modelu i renderuje do MIDI z wybranym instrumentem.
 Po jednej melodii na podaną tonację. Zapisuje ABC + MIDI do osobnego katalogu.
 Użycie:
-  python src/gen_samples.py --ckpt data/models/waltz_ckpt.pt --meter 3/4 --keys D,G,C,Emin,Amin --inst piano  --out data/recordings/waltz
-  python src/gen_samples.py --ckpt data/models/reel_ckpt.pt  --meter 4/4 --keys D,G,A,Emin,Bmin --inst violin --out data/recordings/reel
+  python src/generate/gen_samples.py --ckpt data/models/waltz_ckpt.pt --meter 3/4 --keys D,G,C,Emin,Amin --inst piano  --out data/recordings/waltz
+  python src/generate/gen_samples.py --ckpt data/models/reel_ckpt.pt  --meter 4/4 --keys D,G,A,Emin,Bmin --inst violin --out data/recordings/reel
 """
 import argparse, sys, os
-sys.path.insert(0, "src")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
-from gpt import GPT
-from abc_to_midi import to_midi
+from core.gpt import GPT
+from core.abc_to_midi import to_midi
 from music21 import instrument as M
 
 INST = {"piano": M.Piano, "violin": M.Violin, "guitar": M.AcousticGuitar, "none": None}

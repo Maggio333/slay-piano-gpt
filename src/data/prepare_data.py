@@ -1,7 +1,7 @@
 """Przygotowanie korpusu ABC z thesession.org tunes.csv.
 Filtr: typ + metrum z argumentów (domyślnie jigi 6/8). Buduje grające bloki ABC + normalizuje tonację.
-Użycie: python src/prepare_data.py [typ] [metrum] [wyjście]
-  np. python src/prepare_data.py waltz 3/4 data/corpus/waltz.abc
+Użycie: python src/data/prepare_data.py [typ] [metrum] [wyjście]
+  np. python src/data/prepare_data.py waltz 3/4 data/corpus/waltz.abc
 """
 import csv, re, sys, os
 csv.field_size_limit(10**7)

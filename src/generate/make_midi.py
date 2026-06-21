@@ -1,14 +1,15 @@
 """JEDNO POLECENIE: użyj wytrenowanego GPT, by stworzyć nowe melodie + pliki MIDI.
 
 Przykłady:
-  python src/make_midi.py                      # 3 melodie w D, do data/out_*.mid
-  python src/make_midi.py --key G --n 5         # 5 melodii w G
-  python src/make_midi.py --temp 1.0 --out data/eksperyment
+  python src/generate/make_midi.py                      # 3 melodie w D, do data/out_*.mid
+  python src/generate/make_midi.py --key G --n 5         # 5 melodii w G
+  python src/generate/make_midi.py --temp 1.0 --out data/eksperyment
 """
-import argparse, sys
+import argparse, os, sys
 import torch
-from gpt import GPT
-from abc_to_midi import to_midi          # konwersja ABC -> MIDI (music21)
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.gpt import GPT
+from core.abc_to_midi import to_midi          # konwersja ABC -> MIDI (music21)
 
 
 def first_tune(raw: str) -> str:

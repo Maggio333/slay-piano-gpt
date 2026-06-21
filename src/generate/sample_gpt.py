@@ -1,7 +1,8 @@
 """Generacja melodii z wytrenowanego GPT (wczytuje checkpoint)."""
-import sys
+import os, sys
 import torch
-from gpt import GPT
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.gpt import GPT
 
 sys.stdout.reconfigure(encoding="utf-8")
 device = "cuda" if torch.cuda.is_available() else "cpu"

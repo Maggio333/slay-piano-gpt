@@ -36,8 +36,8 @@ context 128 chars, character-level. Trained on CPU in minutes.
 
 ## Composition experiments
 - **E0 (self-stitch) ✅** — a trained linear mapper at an intermediate seam is lossless (Δppl ≈ 0): the stitching **mechanism** is sound (validates plumbing, not the thesis).
-- **Ensemble fusion** (`src/fuse.py`) — blend two experts' next-token distributions (shared vocab) → audible hybrid. This is the **flat-weighting baseline**.
-- **Duet** (`src/duet.py`) — two experts layered (piano + violin, simultaneous): multi-track, not model-level fusion.
+- **Ensemble fusion** (`src/compose/fuse.py`) — blend two experts' next-token distributions (shared vocab) → audible hybrid. This is the **flat-weighting baseline**.
+- **Duet** (`src/compose/duet.py`) — two experts layered (piano + violin, simultaneous): multi-track, not model-level fusion.
 - **Next — E1:** representation-level stitch (the actual hypothesis, meant to beat these baselines).
 
 ## Pipeline (`src/`)
@@ -48,7 +48,7 @@ context 128 chars, character-level. Trained on CPU in minutes.
 ## Usage
 ```bash
 pip install torch music21
-python src/gen_samples.py --ckpt data/models/waltz_ckpt.pt --meter 3/4 --keys D,G,Emin --inst piano --out out
+python src/generate/gen_samples.py --ckpt data/models/waltz_ckpt.pt --meter 3/4 --keys D,G,Emin --inst piano --out out
 ```
 
 ## Honest scope

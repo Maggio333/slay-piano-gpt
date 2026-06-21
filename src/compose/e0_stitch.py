@@ -3,14 +3,14 @@ Wstaw liniowy mapper g (n_embd x n_embd) na styku PO bloku 2 TEGO SAMEGO modelu,
 zamroź resztę. Waliduje MECHANIZM mappera (hydraulikę), NIE tezę.
   - sanity: g = identyczność -> dokładnie baseline.
   - E0:     g losowy -> trenuj tylko g -> powinien wrócić do baseline (Δppl≈0).
-Użycie: python src/e0_stitch.py [ckpt] [dane]
+Użycie: python src/compose/e0_stitch.py [ckpt] [dane]
 """
-import sys, math
-sys.path.insert(0, "src")
+import os, sys, math
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
 import torch.nn as nn
 from torch.nn import functional as F
-from gpt import GPT
+from core.gpt import GPT
 
 sys.stdout.reconfigure(encoding="utf-8")
 CKPT = sys.argv[1] if len(sys.argv) > 1 else "data/models/jig_ckpt.pt"

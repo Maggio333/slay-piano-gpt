@@ -2,10 +2,10 @@
 To NIE fuzja w jedną linię (jak ensemble), tylko dwie niezależne linie złożone jednocześnie.
 """
 import sys, os
-sys.path.insert(0, "src")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import torch
-from gpt import GPT
-from abc_to_midi import sanitize
+from core.gpt import GPT
+from core.abc_to_midi import sanitize
 from music21 import converter, stream, instrument as M, tempo
 
 def load(p):

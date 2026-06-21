@@ -4,7 +4,8 @@ Batche -> strata cross-entropy -> backprop -> AdamW -> val loss -> checkpoint.
 import os, time, math, sys
 from contextlib import nullcontext
 import torch
-from gpt import GPT, GPTConfig
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from core.gpt import GPT, GPTConfig
 
 # --- hiperparametry ---
 block_size  = 128
