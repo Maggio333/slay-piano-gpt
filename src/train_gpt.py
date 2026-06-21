@@ -28,8 +28,8 @@ print(f"urządzenie: {device} | bf16: {use_bf16}")
 
 # --- ścieżki z argumentów (domyślnie: jigi) ---
 DATA    = sys.argv[1] if len(sys.argv) > 1 else "data/jigs.abc"
-CKPT    = sys.argv[2] if len(sys.argv) > 2 else "data/gpt_ckpt.pt"
-LOSSLOG = sys.argv[3] if len(sys.argv) > 3 else "data/loss_log.csv"
+CKPT    = sys.argv[2] if len(sys.argv) > 2 else "data/models/jig_ckpt.pt"
+LOSSLOG = sys.argv[3] if len(sys.argv) > 3 else "data/models/jig_loss_log.csv"
 VOCAB_FROM = sys.argv[4] if len(sys.argv) > 4 else None   # wspólny słownik z innego ckpt (do stitchu)
 print(f"dane: {DATA} -> checkpoint: {CKPT}")
 

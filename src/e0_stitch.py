@@ -13,7 +13,7 @@ from torch.nn import functional as F
 from gpt import GPT
 
 sys.stdout.reconfigure(encoding="utf-8")
-CKPT = sys.argv[1] if len(sys.argv) > 1 else "data/gpt_ckpt.pt"
+CKPT = sys.argv[1] if len(sys.argv) > 1 else "data/models/jig_ckpt.pt"
 DATA = sys.argv[2] if len(sys.argv) > 2 else "data/jigs.abc"
 SEAM = 2          # g przed blokiem o indeksie 2 = styk po 2 blokach
 TRAIN_STEPS = 500

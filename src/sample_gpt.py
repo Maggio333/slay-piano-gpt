@@ -5,7 +5,7 @@ from gpt import GPT
 
 sys.stdout.reconfigure(encoding="utf-8")
 device = "cuda" if torch.cuda.is_available() else "cpu"
-ck = torch.load("data/gpt_ckpt.pt", map_location=device, weights_only=False)
+ck = torch.load("data/models/jig_ckpt.pt", map_location=device, weights_only=False)
 stoi, itos, cfg = ck["stoi"], ck["itos"], ck["config"]
 
 model = GPT(cfg).to(device)

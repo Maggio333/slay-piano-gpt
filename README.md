@@ -26,7 +26,7 @@ context 128 chars, character-level. Trained on CPU in minutes.
 ## The experts
 | Expert (`data/models/`) | Style / render | Training data | Val perplexity |
 |---|---|---|---|
-| `gpt_ckpt.pt` (jig) | Irish jig, 6/8 | 12.1k tunes (thesession.org) | **3.80** |
+| `jig_ckpt.pt` | Irish jig, 6/8 | 12.1k tunes (thesession.org) | **3.80** |
 | `bach_ckpt.pt` | Baroque chorale soprano | 350 soprano lines (music21) | 2.09\* |
 | `waltz_ckpt.pt` | Lyrical waltz, 3/4 → piano | 3.0k tunes | ~4.4 |
 | `reel_ckpt.pt` | Driving fiddle, 4/4 → violin | 17.2k tunes | ~4.9 |

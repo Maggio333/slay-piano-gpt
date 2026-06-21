@@ -2,11 +2,9 @@
 __pycache__/
 *.pyc
 
-# Surowe dane i generacje NIE idą do repo (licencja thesession / rozmiar).
-# Idą za to wytrenowane MODELE (wagi) — to nasze artefakty.
+# Repo = kod + wagi + docs. Surowe dane i OUTPUTY (nagrania, korpusy, raporty robocze)
+# są regenerowalne, więc NIE idą. Idą tylko wytrenowane MODELE (wagi).
 data/*
-!data/gpt_ckpt.pt
-!data/loss_log.csv
 !data/models
 data/models/*
 !data/models/*.pt

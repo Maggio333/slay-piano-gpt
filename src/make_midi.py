@@ -28,7 +28,7 @@ def main():
     ap.add_argument("--temp", type=float, default=0.8, help="temperatura (więcej = śmielej)")
     ap.add_argument("--topk", type=int,   default=20)
     ap.add_argument("--new",  type=int,   default=400, help="ile znaków generować na melodię")
-    ap.add_argument("--ckpt", default="data/gpt_ckpt.pt")
+    ap.add_argument("--ckpt", default="data/models/jig_ckpt.pt")
     ap.add_argument("--out",  default="data/out", help="prefiks plików wyjściowych")
     args = ap.parse_args()
     sys.stdout.reconfigure(encoding="utf-8")
