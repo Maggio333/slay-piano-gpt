@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pl"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>slay-piano-gpt - eval: GPT vs n-gram</title>
+<style>
+body{background:#0c0c12;color:#e6e6ef;font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:880px;margin:0 auto;padding:40px 20px;line-height:1.6}
+h1{font-size:1.7rem;margin:0 0 4px} .sub{color:#9a9ab0;margin-bottom:24px;font-size:.95rem}
+table{width:100%;border-collapse:collapse;margin:18px 0;font-size:.92rem}
+th,td{padding:9px 11px;border-bottom:1px solid #23232f;text-align:left}
+th{color:#9a9ab0;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em}
+td.hl{color:#d9a441;font-weight:700;font-size:1.05rem} td b{color:#fff}
+.note{color:#8d8da3;font-size:.85rem;margin-top:14px}
+code{background:#15151f;padding:2px 6px;border-radius:5px;font-size:.85rem}
+</style></head><body>
+<h1>slay-piano-gpt - eval</h1>
+<div class="sub">GPT (od zera) vs n-gram baseline na tym samym held-out. Reprodukowalne: <code>python src/eval.py</code> &middot; seed 20260620</div>
+<p>Korpus: 2,452,610 znakow &middot; slownik 52 &middot; held-out 245,261 znakow.</p>
+<table>
+<tr><th>Model</th><th>Param</th><th>Kontekst</th><th>Perplexity &darr;</th><th>Val loss</th><th>Nowe 8-gramy &uarr;</th><th>Poprawny ABC &uarr;</th><th>Sr. dlugosc</th></tr>
+<tr><td><b>GPT (transformer)</b></td><td>816384</td><td>128 zn.</td><td class=hl>3.82</td><td>1.3401</td><td>66.5%</td><td>58.3%</td><td>245.2</td></tr><tr><td><b>n-gram (order-6)</b></td><td>-</td><td>6 zn.</td><td class=hl>4.99</td><td>1.6075</td><td>19.4%</td><td>29.2%</td><td>274.3</td></tr>
+</table>
+<p class="note">Perplexity (nizej=lepiej): GPT wygrywa dzieki oknu uwagi 128 zn. vs 6 zn. n-grama.
+"Nowe 8-gramy" = % 8-znakowych fragmentow generacji NIEobecnych w treningu (wyzej = wiecej komponuje, mniej kopiuje).
+"Poprawny ABC" = % melodii ze zbilansowana struktura (naglowki, |: :|, charset). Metryka zadaniowa, nie tylko strata (L09).</p>
+<p class="note">Slayer Labs &middot; reprodukowalny harness &middot; model: Arkadiusz Slota</p>
+</body></html>
